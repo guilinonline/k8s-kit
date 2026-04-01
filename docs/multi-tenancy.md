@@ -9,7 +9,7 @@ k8s-kit provides multi-tenancy support through Context-based tenant information 
 ### Context-Based Tenant Passing
 
 ```go
-import "github.com/seaman/k8s-kit/pkg/tenant"
+import "github.com/guilinonline/k8s-kit/pkg/tenant"
 
 // Inject tenant
 ctx := tenant.WithTenant(context.Background(), "tenant-123")

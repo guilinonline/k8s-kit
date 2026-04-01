@@ -3,8 +3,8 @@ package cluster
 import (
 	"fmt"
 
-	"github.com/seaman/k8s-kit/pkg/client"
-	"github.com/seaman/k8s-kit/pkg/informer"
+	"github.com/guilinonline/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/informer"
 )
 
 // GetOrCreateInformer gets or creates an Informer for the specified cluster.

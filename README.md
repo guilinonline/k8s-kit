@@ -14,7 +14,7 @@ k8s-kit is a Go library that provides a clean, dependency-injection friendly abs
 ## Installation
 
 ```bash
-go get github.com/seaman/k8s-kit
+go get github.com/guilinonline/k8s-kit
 ```
 
 ## Quick Start
@@ -27,8 +27,8 @@ import (
     "fmt"
     "os"
 
-    "github.com/seaman/k8s-kit/pkg/client"
-    "github.com/seaman/k8s-kit/pkg/resource"
+    "github.com/guilinonline/k8s-kit/pkg/client"
+    "github.com/guilinonline/k8s-kit/pkg/resource"
     corev1 "k8s.io/api/core/v1"
     metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )

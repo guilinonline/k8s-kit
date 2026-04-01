@@ -7,7 +7,7 @@ PodOperator provides Pod-specific operations including log retrieval and command
 ## Quick Start
 
 ```go
-import "github.com/seaman/k8s-kit/pkg/pod"
+import "github.com/guilinonline/k8s-kit/pkg/pod"
 
 operator := pod.NewOperator()
 
@@ -82,7 +82,7 @@ Interactive execution with I/O streams.
 ## Error Handling
 
 ```go
-import "github.com/seaman/k8s-kit/pkg/pod"
+import "github.com/guilinonline/k8s-kit/pkg/pod"
 
 if pod.IsContainerNotFound(err) { ... }
 if pod.IsPodNotFound(err) { ... }

@@ -8,9 +8,9 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/seaman/k8s-kit/pkg/cluster"
-	"github.com/seaman/k8s-kit/pkg/client"
-	"github.com/seaman/k8s-kit/pkg/tenant"
+	"github.com/guilinonline/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/cluster"
+	"github.com/guilinonline/k8s-kit/pkg/tenant"
 )
 
 func main() {

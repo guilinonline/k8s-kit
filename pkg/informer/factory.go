@@ -9,7 +9,7 @@ import (
 	"k8s.io/client-go/informers"
 	//"k8s.io/client-go/kubernetes"
 
-	"github.com/seaman/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/client"
 )
 
 // Factory Informer工厂

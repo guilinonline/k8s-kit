@@ -8,7 +8,7 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	"github.com/seaman/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/client"
 )
 
 // GetLogsSimple retrieves Pod logs as a simple string.

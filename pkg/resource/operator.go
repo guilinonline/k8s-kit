@@ -9,7 +9,7 @@ import (
 	"k8s.io/apimachinery/pkg/watch"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/seaman/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/client"
 )
 
 // Operator 资源操作器

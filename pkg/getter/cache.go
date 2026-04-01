@@ -8,7 +8,7 @@ import (
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/seaman/k8s-kit/pkg/informer"
+	"github.com/guilinonline/k8s-kit/pkg/informer"
 )
 
 // CacheReader 基于Informer的缓存读取器
@@ -28,7 +28,7 @@ func NewCacheReader(factory informers.SharedInformerFactory) *CacheReader {
 // ListPods 从缓存获取Pod列表
 func (c *CacheReader) ListPods(namespace string, selector labels.Selector) ([]interface{}, error) {
 	podLister := c.factory.Core().V1().Pods().Lister()
-	
+
 	if namespace != "" {
 		return podLister.Pods(namespace).List(selector)
 	}
@@ -43,7 +43,7 @@ func (c *CacheReader) GetPod(namespace, name string) (interface{}, error) {
 // ListServices 从缓存获取Service列表
 func (c *CacheReader) ListServices(namespace string, selector labels.Selector) ([]interface{}, error) {
 	svcLister := c.factory.Core().V1().Services().Lister()
-	
+
 	if namespace != "" {
 		return svcLister.Services(namespace).List(selector)
 	}
@@ -53,7 +53,7 @@ func (c *CacheReader) ListServices(namespace string, selector labels.Selector) (
 // ListDeployments 从缓存获取Deployment列表
 func (c *CacheReader) ListDeployments(namespace string, selector labels.Selector) ([]interface{}, error) {
 	depLister := c.factory.Apps().V1().Deployments().Lister()
-	
+
 	if namespace != "" {
 		return depLister.Deployments(namespace).List(selector)
 	}

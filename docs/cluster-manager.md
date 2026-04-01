@@ -8,8 +8,8 @@ ClusterManager provides multi-cluster Kubernetes management, including cluster l
 
 ```go
 import (
-    "github.com/seaman/k8s-kit/pkg/cluster"
-    "github.com/seaman/k8s-kit/pkg/client"
+    "github.com/guilinonline/k8s-kit/pkg/cluster"
+    "github.com/guilinonline/k8s-kit/pkg/client"
 )
 
 // Create client factory

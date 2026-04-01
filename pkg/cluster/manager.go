@@ -6,8 +6,8 @@ import (
 	"math"
 	"time"
 
-	"github.com/seaman/k8s-kit/pkg/client"
-	"github.com/seaman/k8s-kit/pkg/tenant"
+	"github.com/guilinonline/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/tenant"
 )
 
 // NewManager creates a new ClusterManager.

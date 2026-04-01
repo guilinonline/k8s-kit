@@ -7,8 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/seaman/k8s-kit/pkg/client"
-	"github.com/seaman/k8s-kit/pkg/informer"
+	"github.com/guilinonline/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/informer"
 )
 
 // Manager is the multi-cluster Kubernetes manager.
@@ -28,25 +28,25 @@ type Manager struct {
 	onClusterHealthy     func(id string)
 	onClusterUnhealthy   func(id string)
 	onClusterReconnected func(id string)
-	onInformerRecreate  func(id string)
+	onInformerRecreate   func(id string)
 }
 
 // ManagedCluster represents a single managed Kubernetes cluster.
 type ManagedCluster struct {
-	ID        string
-	TenantID  string // Optional: tenant ID for multi-tenancy
+	ID       string
+	TenantID string // Optional: tenant ID for multi-tenancy
 
 	mu sync.RWMutex
 	// These fields require mutex protection
-	client        *client.ClusterClient
-	informerMgr   *informerManager
-	health        HealthStatus
-	failCount     int
-	lastCheck     time.Time
-	lastAccess    time.Time
-	version       string
+	client             *client.ClusterClient
+	informerMgr        *informerManager
+	health             HealthStatus
+	failCount          int
+	lastCheck          time.Time
+	lastAccess         time.Time
+	version            string
 	recreatingInformer bool
-	closed        bool
+	closed             bool
 }
 
 // HealthStatus represents the health state of a cluster.
@@ -106,8 +106,8 @@ type ClusterConfig struct {
 
 // informerManager manages Informers for a single cluster.
 type informerManager struct {
-	client *client.ClusterClient
-	mu     sync.RWMutex
+	client  *client.ClusterClient
+	mu      sync.RWMutex
 	entries map[string]*informer.Entry
 }
 

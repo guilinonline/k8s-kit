@@ -9,7 +9,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/tools/remotecommand"
 
-	"github.com/seaman/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/client"
 )
 
 // ExecStream executes a command in interactive mode.

@@ -1,4 +1,4 @@
-module github.com/seaman/k8s-kit
+module github.com/guilinonline/k8s-kit
 
 go 1.21
 

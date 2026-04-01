@@ -8,8 +8,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/seaman/k8s-kit/pkg/client"
-	"github.com/seaman/k8s-kit/pkg/cluster"
+	"github.com/guilinonline/k8s-kit/pkg/client"
+	"github.com/guilinonline/k8s-kit/pkg/cluster"
 )
 
 func main() {
