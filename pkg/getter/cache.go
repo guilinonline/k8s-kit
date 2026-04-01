@@ -1,14 +1,13 @@
 package getter
 
 import (
-	"context"
-	"time"
-
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/client-go/informers"
 	"k8s.io/client-go/tools/cache"
 
-	"github.com/guilinonline/k8s-kit/pkg/informer"
+	_ "github.com/guilinonline/k8s-kit/pkg/informer"
 )
 
 // CacheReader 基于Informer的缓存读取器
@@ -26,7 +25,7 @@ func NewCacheReader(factory informers.SharedInformerFactory) *CacheReader {
 }
 
 // ListPods 从缓存获取Pod列表
-func (c *CacheReader) ListPods(namespace string, selector labels.Selector) ([]interface{}, error) {
+func (c *CacheReader) ListPods(namespace string, selector labels.Selector) ([]*corev1.Pod, error) {
 	podLister := c.factory.Core().V1().Pods().Lister()
 
 	if namespace != "" {
@@ -36,12 +35,12 @@ func (c *CacheReader) ListPods(namespace string, selector labels.Selector) ([]in
 }
 
 // GetPod 从缓存获取单个Pod
-func (c *CacheReader) GetPod(namespace, name string) (interface{}, error) {
+func (c *CacheReader) GetPod(namespace, name string) (*corev1.Pod, error) {
 	return c.factory.Core().V1().Pods().Lister().Pods(namespace).Get(name)
 }
 
 // ListServices 从缓存获取Service列表
-func (c *CacheReader) ListServices(namespace string, selector labels.Selector) ([]interface{}, error) {
+func (c *CacheReader) ListServices(namespace string, selector labels.Selector) ([]*corev1.Service, error) {
 	svcLister := c.factory.Core().V1().Services().Lister()
 
 	if namespace != "" {
@@ -51,7 +50,7 @@ func (c *CacheReader) ListServices(namespace string, selector labels.Selector) (
 }
 
 // ListDeployments 从缓存获取Deployment列表
-func (c *CacheReader) ListDeployments(namespace string, selector labels.Selector) ([]interface{}, error) {
+func (c *CacheReader) ListDeployments(namespace string, selector labels.Selector) ([]*appsv1.Deployment, error) {
 	depLister := c.factory.Apps().V1().Deployments().Lister()
 
 	if namespace != "" {
@@ -86,9 +85,5 @@ func NewCacheGetter(reader *CacheReader) *CacheGetter {
 
 // GetPod 从缓存获取Pod
 func (g *CacheGetter) GetPod(namespace, name string) (*corev1.Pod, error) {
-	obj, err := g.reader.GetPod(namespace, name)
-	if err != nil {
-		return nil, err
-	}
-	return obj.(*corev1.Pod), nil
+	return g.reader.GetPod(namespace, name)
 }

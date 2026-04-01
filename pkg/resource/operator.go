@@ -3,13 +3,10 @@ package resource
 import (
 	"context"
 
-	"k8s.io/apimachinery/pkg/fields"
-	"k8s.io/apimachinery/pkg/labels"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/apimachinery/pkg/watch"
-	"sigs.k8s.io/controller-runtime/pkg/client"
+	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
-	"github.com/guilinonline/k8s-kit/pkg/client"
+	k8sclient "github.com/guilinonline/k8s-kit/pkg/client"
 )
 
 // Operator 资源操作器
@@ -23,8 +20,8 @@ func NewOperator() *Operator {
 // Get 获取资源
 func (o *Operator) Get(
 	ctx context.Context,
-	cli *client.ClusterClient,
-	obj client.Object,
+	cli *k8sclient.ClusterClient,
+	obj runtimeclient.Object,
 	key types.NamespacedName,
 ) error {
 	return cli.RuntimeClient.Get(ctx, key, obj)
@@ -33,8 +30,8 @@ func (o *Operator) Get(
 // List 列表查询
 func (o *Operator) List(
 	ctx context.Context,
-	cli *client.ClusterClient,
-	list client.ObjectList,
+	cli *k8sclient.ClusterClient,
+	list runtimeclient.ObjectList,
 	opts ...ListOption,
 ) error {
 	options := &ListOptions{}
@@ -42,21 +39,21 @@ func (o *Operator) List(
 		opt(options)
 	}
 
-	listOpts := []client.ListOption{}
+	listOpts := []runtimeclient.ListOption{}
 	if options.Namespace != "" {
-		listOpts = append(listOpts, client.InNamespace(options.Namespace))
+		listOpts = append(listOpts, runtimeclient.InNamespace(options.Namespace))
 	}
 	if options.LabelSelector != nil {
-		listOpts = append(listOpts, client.MatchingLabelsSelector{Selector: options.LabelSelector})
+		listOpts = append(listOpts, runtimeclient.MatchingLabelsSelector{Selector: options.LabelSelector})
 	}
 	if options.FieldSelector != nil {
-		listOpts = append(listOpts, client.MatchingFieldsSelector{Selector: options.FieldSelector})
+		listOpts = append(listOpts, runtimeclient.MatchingFieldsSelector{Selector: options.FieldSelector})
 	}
 	if options.Limit > 0 {
-		listOpts = append(listOpts, client.Limit(options.Limit))
+		listOpts = append(listOpts, runtimeclient.Limit(options.Limit))
 	}
 	if options.Continue != "" {
-		listOpts = append(listOpts, client.Continue(options.Continue))
+		listOpts = append(listOpts, runtimeclient.Continue(options.Continue))
 	}
 
 	return cli.RuntimeClient.List(ctx, list, listOpts...)
@@ -65,8 +62,8 @@ func (o *Operator) List(
 // Create 创建资源
 func (o *Operator) Create(
 	ctx context.Context,
-	cli *client.ClusterClient,
-	obj client.Object,
+	cli *k8sclient.ClusterClient,
+	obj runtimeclient.Object,
 	opts ...CreateOption,
 ) error {
 	options := &CreateOptions{}
@@ -74,9 +71,9 @@ func (o *Operator) Create(
 		opt(options)
 	}
 
-	createOpts := []client.CreateOption{}
+	createOpts := []runtimeclient.CreateOption{}
 	if options.FieldManager != "" {
-		createOpts = append(createOpts, client.FieldOwner(options.FieldManager))
+		createOpts = append(createOpts, runtimeclient.FieldOwner(options.FieldManager))
 	}
 
 	return cli.RuntimeClient.Create(ctx, obj, createOpts...)
@@ -85,8 +82,8 @@ func (o *Operator) Create(
 // Update 更新资源
 func (o *Operator) Update(
 	ctx context.Context,
-	cli *client.ClusterClient,
-	obj client.Object,
+	cli *k8sclient.ClusterClient,
+	obj runtimeclient.Object,
 	opts ...UpdateOption,
 ) error {
 	options := &UpdateOptions{}
@@ -94,9 +91,9 @@ func (o *Operator) Update(
 		opt(options)
 	}
 
-	updateOpts := []client.UpdateOption{}
+	updateOpts := []runtimeclient.UpdateOption{}
 	if options.FieldManager != "" {
-		updateOpts = append(updateOpts, client.FieldOwner(options.FieldManager))
+		updateOpts = append(updateOpts, runtimeclient.FieldOwner(options.FieldManager))
 	}
 
 	return cli.RuntimeClient.Update(ctx, obj, updateOpts...)
@@ -105,9 +102,9 @@ func (o *Operator) Update(
 // Patch 补丁更新
 func (o *Operator) Patch(
 	ctx context.Context,
-	cli *client.ClusterClient,
-	obj client.Object,
-	patch client.Patch,
+	cli *k8sclient.ClusterClient,
+	obj runtimeclient.Object,
+	patch runtimeclient.Patch,
 	opts ...PatchOption,
 ) error {
 	options := &PatchOptions{}
@@ -115,12 +112,9 @@ func (o *Operator) Patch(
 		opt(options)
 	}
 
-	patchOpts := []client.PatchOption{}
+	patchOpts := []runtimeclient.PatchOption{}
 	if options.FieldManager != "" {
-		patchOpts = append(patchOpts, client.FieldOwner(options.FieldManager))
-	}
-	if options.Force != nil {
-		patchOpts = append(patchOpts, client.Force(*options.Force))
+		patchOpts = append(patchOpts, runtimeclient.FieldOwner(options.FieldManager))
 	}
 
 	return cli.RuntimeClient.Patch(ctx, obj, patch, patchOpts...)
@@ -129,8 +123,8 @@ func (o *Operator) Patch(
 // Delete 删除资源
 func (o *Operator) Delete(
 	ctx context.Context,
-	cli *client.ClusterClient,
-	obj client.Object,
+	cli *k8sclient.ClusterClient,
+	obj runtimeclient.Object,
 	opts ...DeleteOption,
 ) error {
 	options := &DeleteOptions{}
@@ -138,39 +132,10 @@ func (o *Operator) Delete(
 		opt(options)
 	}
 
-	deleteOpts := []client.DeleteOption{}
+	deleteOpts := []runtimeclient.DeleteOption{}
 	if options.GracePeriodSeconds != nil {
-		deleteOpts = append(deleteOpts, client.GracePeriodSeconds(*options.GracePeriodSeconds))
-	}
-	if options.Preconditions != nil {
-		deleteOpts = append(deleteOpts, client.Preconditions(*options.Preconditions))
+		deleteOpts = append(deleteOpts, runtimeclient.GracePeriodSeconds(*options.GracePeriodSeconds))
 	}
 
 	return cli.RuntimeClient.Delete(ctx, obj, deleteOpts...)
-}
-
-// Watch 监听资源变化
-func (o *Operator) Watch(
-	ctx context.Context,
-	cli *client.ClusterClient,
-	obj client.Object,
-	opts ...WatchOption,
-) (watch.Interface, error) {
-	options := &WatchOptions{}
-	for _, opt := range opts {
-		opt(options)
-	}
-
-	watchOpts := []client.ListOption{}
-	if options.Namespace != "" {
-		watchOpts = append(watchOpts, client.InNamespace(options.Namespace))
-	}
-	if options.LabelSelector != nil {
-		watchOpts = append(watchOpts, client.MatchingLabelsSelector{Selector: options.LabelSelector})
-	}
-	if options.FieldSelector != nil {
-		watchOpts = append(watchOpts, client.MatchingFieldsSelector{Selector: options.FieldSelector})
-	}
-
-	return cli.RuntimeClient.Watch(ctx, obj, watchOpts...)
 }
