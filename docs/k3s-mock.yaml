@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+  # 集群1：6443（纯 APIServer + etcd）
+  k8s-mock-1:
+    image: rancher/k3s:latest
+    container_name: k8s-mock-1
+    privileged: true
+    restart: unless-stopped
+    ports:
+      - "6443:6443"
+    command:
+      - server
+      - --https-listen-port=6443
+      - --disable=traefik          # ✅ 正确写法
+      - --disable=servicelb         # ✅ 同时禁用 ServiceLB（可选）
+      - --cluster-init
+      #- --disable-agent
+      #- --disable-scheduler
+      #- --disable-controller-manager
+      #- --disable-network-policy
+    volumes:
+      - k8s-mock-1-data:/var/lib/rancher/k3s
+    environment:
+      - K3S_TOKEN=cluster1-mock-2026
+
+  # 集群2：6444（纯 APIServer + etcd）
+  k8s-mock-2:
+    image: rancher/k3s:latest
+    container_name: k8s-mock-2
+    privileged: true
+    restart: unless-stopped
+    ports:
+      - "6444:6444"
+    command:
+      - server
+      - --https-listen-port=6444
+      - --disable=traefik          # ✅ 正确写法
+      - --disable=servicelb         # ✅ 同时禁用 ServiceLB（可选）
+      - --cluster-init
+      #- --disable-agent
+      #- --disable-scheduler
+      #- --disable-controller-manager
+      #- --disable-network-policy
+    volumes:
+      - k8s-mock-2-data:/var/lib/rancher/k3s
+    environment:
+      - K3S_TOKEN=cluster2-mock-2026
+
+volumes:
+  k8s-mock-1-data:
+  k8s-mock-2-data:
