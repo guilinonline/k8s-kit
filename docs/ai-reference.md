@@ -137,11 +137,33 @@ func (m *Manager) Start(ctx context.Context, provider ConfigProvider) error
 // 注册选项
 func WithTenantID(tenantID string) RegisterOption
 
-// 配置提供者接口
+// 配置提供者接口 (热更新混合模式)
 type ConfigProvider interface {
-    GetAll(ctx context.Context) ([]ClusterConfig, error)
+    GetAll(ctx context.Context) ([]ClusterConfig, error)  // 必须实现
+}
+
+// 可选: 实现 ConfigWatcher 启用 Push 模式
+type ConfigWatcher interface {
     Watch(ctx context.Context) (<-chan ClusterConfigChange, error)
 }
+
+// 集群配置
+type ClusterConfig struct {
+    ID        string
+    Kubeconfig []byte
+    TenantID  string
+}
+
+// 配置变更事件
+type ClusterConfigChange struct {
+    Type      ChangeType  // ChangeTypeAdd, ChangeTypeUpdate, ChangeTypeDelete
+    ClusterID string
+    Kubeconfig []byte
+    TenantID  string
+}
+
+// 启动热更新 (混合模式: Push + Pull)
+func (m *Manager) Start(ctx context.Context, provider ConfigProvider) error
 ```
 
 ### pkg/pod
