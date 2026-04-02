@@ -342,6 +342,19 @@ func main() {
     }
     fmt.Printf("查询到 %d 个 Pod\n", len(podList.Items))
 
+    // ----- List 后客户端过滤（适合数据量小的场景）-----
+    // 按名称包含过滤（默认）
+    filtered := resource.FilterByName(podList.Items, "nginx")
+    fmt.Printf("名称包含 'nginx' 的 Pod: %d 个\n", len(filtered))
+
+    // 按名称前缀过滤
+    webPods := resource.FilterByName(podList.Items, "web-", resource.MatchPrefix)
+    fmt.Printf("名称以 'web-' 开头的 Pod: %d 个\n", len(webPods))
+
+    // 按名称后缀过滤
+    prodPods := resource.FilterByName(podList.Items, "-prod", resource.MatchSuffix)
+    fmt.Printf("名称以 '-prod' 结尾的 Pod: %d 个\n", len(prodPods))
+
     // ----- Update 更新资源 -----
     pod.Labels["version"] = "v2"
     if err := operator.Update(ctx, cli, pod); err != nil {
@@ -608,6 +621,13 @@ resource.WithLabelSelector(selector)
 resource.WithFieldSelector(selector)
 resource.WithLimit(n)          // 分页限制
 resource.WithContinue(token)   // 分页 token
+
+// 客户端过滤函数（List 后内存过滤）
+// 注意：此函数在客户端内存中过滤，适合数据量较小的场景
+filtered := resource.FilterByName(items, "nginx")                    // 包含匹配（默认）
+filtered := resource.FilterByName(items, "web-", resource.MatchPrefix)  // 前缀匹配
+filtered := resource.FilterByName(items, "-prod", resource.MatchSuffix) // 后缀匹配
+filtered := resource.FilterByName(items, "^web-.*-prod$", resource.MatchRegex) // 正则匹配
 ```
 
 ### pkg/pod
