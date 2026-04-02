@@ -17,11 +17,11 @@ type ClusterClient struct {
 
 // ClientOptions 客户端选项
 type ClientOptions struct {
-	Timeout       time.Duration
-	QPS           float32
-	Burst         int
-	UserAgent     string
-	Impersonate   *rest.ImpersonationConfig
+	Timeout     time.Duration
+	QPS         float32
+	Burst       int
+	UserAgent   string
+	Impersonate *rest.ImpersonationConfig
 }
 
 // Option 客户端选项函数
@@ -38,6 +38,13 @@ func WithTimeout(timeout time.Duration) Option {
 func WithQPS(qps float32) Option {
 	return func(o *ClientOptions) {
 		o.QPS = qps
+	}
+}
+
+// WithBurst 设置Burst
+func WithBurst(burst int) Option {
+	return func(o *ClientOptions) {
+		o.Burst = burst
 	}
 }
 

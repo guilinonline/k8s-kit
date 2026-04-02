@@ -113,6 +113,11 @@ func Paginate[T any](items []T, limit, offset int) ([]T, bool) {
 		return items, false
 	}
 
+	// 处理负 offset
+	if offset < 0 {
+		offset = 0
+	}
+
 	if offset >= len(items) {
 		return []T{}, false
 	}
