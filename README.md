@@ -151,6 +151,18 @@ Contributions are welcome! Please:
 3. Add tests for new features
 4. Update documentation
 
+## Author
+
+**桂林 (C.Guilin)**
+
+- GitHub: [@guilinonline](https://github.com/guilinonline)
+- 博客: [https://gl.sh.cn](https://gl.sh.cn)
+- 职业: 程序员 / 运维工程师
+- 坐标: 中国 · 桂林
+- 认证: **CKA** (Certified Kubernetes Administrator)、**CKS** (Certified Kubernetes Security Specialist)
+
+具备大型互联网运维架构设计能力，曾任职于头部企业负责运维研发团队技术管理。专注于 Kubernetes、云原生技术和 Go 语言开发，热爱开源分享。
+
 ## License
 
 MIT License - see LICENSE file for details.
