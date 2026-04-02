@@ -61,6 +61,9 @@ func (o *Operator) initCache() error {
 	// 创建 Informer Factory
 	o.factory = informers.NewSharedInformerFactory(o.client.Clientset, 0) // 使用默认 resync
 
+	// ⚠️ 关键：先创建 Pod Informer，确保它被注册到 factory，然后再启动
+	_ = o.factory.Core().V1().Pods().Informer()
+
 	// 启动 Informer
 	o.factory.Start(o.stopCh)
 
