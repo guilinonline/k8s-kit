@@ -38,6 +38,14 @@ func WithLimit(limit int64) ListOption {
 	}
 }
 
+// WithContinue 设置分页继续 token
+// 用于获取下一页数据，token 来自上一次返回的 ListMeta.Continue
+func WithContinue(token string) ListOption {
+	return func(o *ListOptions) {
+		o.Continue = token
+	}
+}
+
 // CreateOptions 创建选项
 type CreateOptions struct {
 	FieldManager string

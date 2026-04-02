@@ -626,10 +626,10 @@ operator.Delete(ctx, cli, obj, opts...)
 
 // List 选项
 resource.WithNamespace(ns)
-resource.WithLabelSelector(selector)
-resource.WithFieldSelector(selector)
-resource.WithLimit(n)          // 分页限制
-resource.WithContinue(token)   // 分页 token
+resource.WithLabelSelector(selector)       // 标签筛选（APIServer 过滤，推荐）
+resource.WithFieldSelector(selector)       // 字段筛选（APIServer 过滤）
+resource.WithLimit(n)                      // 分页：每页数量
+resource.WithContinue(token)               // 分页：继续 token（来自上一次返回的 ListMeta.Continue）
 
 // 客户端过滤函数（List 后内存过滤）
 //
