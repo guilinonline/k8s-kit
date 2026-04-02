@@ -29,20 +29,20 @@ const (
 // DefaultOptions 默认选项
 var DefaultOptions = Options{
 	Namespace:    "",
-	ResyncPeriod: 30 * time.Second,
+	ResyncPeriod: 5 * time.Minute, // 调大 Resync 间隔，减少 APIServer 压力
 	Lifecycle:    LifecyclePersistent,
 }
 
 // Entry Informer条目
 type Entry struct {
-	Key           string
-	Factory       informers.SharedInformerFactory
-	StopCh        chan struct{}
-	Lifecycle     Lifecycle
-	CreatedAt     time.Time
-	LastAccessed  time.Time
-	RefCount      int32
-	mu            sync.RWMutex
+	Key          string
+	Factory      informers.SharedInformerFactory
+	StopCh       chan struct{}
+	Lifecycle    Lifecycle
+	CreatedAt    time.Time
+	LastAccessed time.Time
+	RefCount     int32
+	mu           sync.RWMutex
 }
 
 // Stop 停止Informer

@@ -82,7 +82,11 @@ func (m *Manager) handleConfigChange(event ClusterConfigChange) {
 
 // syncLoop periodically syncs with the config provider as a fallback.
 func (m *Manager) syncLoop(ctx context.Context, provider ConfigProvider) {
-	ticker := time.NewTicker(5 * time.Minute)
+	syncInterval := m.healthConfig.SyncInterval
+	if syncInterval <= 0 {
+		syncInterval = 5 * time.Minute // 默认值
+	}
+	ticker := time.NewTicker(syncInterval)
 	defer ticker.Stop()
 
 	for {

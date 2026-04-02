@@ -5,7 +5,7 @@ import "time"
 // HealthCheckConfig contains configuration for cluster health checking.
 type HealthCheckConfig struct {
 	// Interval is the interval between health checks.
-	// Default: 30 seconds.
+	// Default: 60 seconds.
 	Interval time.Duration
 
 	// Timeout is the timeout for a single health check.
@@ -28,6 +28,10 @@ type HealthCheckConfig struct {
 
 	// ReconnectBackoff contains the backoff strategy for reconnections.
 	ReconnectBackoff BackoffStrategy
+
+	// SyncInterval is the interval for periodic config sync (Pull mode).
+	// Default: 5 minutes.
+	SyncInterval time.Duration
 
 	// MaxEntries is the maximum number of Informer entries per cluster.
 	// 0 means no limit.
@@ -65,12 +69,13 @@ type BackoffStrategy struct {
 
 // DefaultHealthCheckConfig is the default health check configuration.
 var DefaultHealthCheckConfig = HealthCheckConfig{
-	Interval:         30 * time.Second,
+	Interval:         60 * time.Second, // 调大间隔，减少 APIServer 压力
 	Timeout:          5 * time.Second,
 	FailureThreshold: 3,
 	SuccessThreshold: 2,
 	AutoReconnect:    true,
 	ReconnectBackoff: DefaultBackoffStrategy,
+	SyncInterval:     5 * time.Minute, // Pull 同步间隔
 	MaxEntries:       100,
 	CleanupInterval:  5 * time.Minute,
 	IdleTimeout:      10 * time.Minute,
@@ -101,9 +106,9 @@ func WithTenantID(tenantID string) RegisterOption {
 
 // EventCallbacks contains event callback functions for cluster events.
 type EventCallbacks struct {
-	OnHealthy     func(id string)
-	OnUnhealthy   func(id string)
-	OnReconnected func(id string)
+	OnHealthy          func(id string)
+	OnUnhealthy        func(id string)
+	OnReconnected      func(id string)
 	OnInformerRecreate func(id string)
 }
 

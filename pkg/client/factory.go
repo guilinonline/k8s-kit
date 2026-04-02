@@ -36,8 +36,8 @@ func NewFactory(opts ...Option) *Factory {
 
 const (
 	DefaultTimeout = 30 * time.Second
-	DefaultQPS     = 100
-	DefaultBurst   = 150
+	DefaultQPS     = 50  // 降低默认 QPS，避免打挂 APIServer
+	DefaultBurst   = 100 // 降低默认 Burst
 )
 
 // CreateFromKubeconfig 从kubeconfig创建

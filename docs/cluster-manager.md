@@ -135,6 +135,8 @@ The ClusterManager supports dynamic cluster configuration with a hybrid approach
 
 ### Quick Start with Dynamic Config
 
+**核心概念**：业务层实现 `Watch()` 返回一个 channel，**业务主动向这个 channel 推送变更**，kit 被动监听。
+
 ```go
 import (
     "context"
@@ -146,7 +148,9 @@ import (
 
 // Step 1: Define your config source (e.g., from database)
 type DBConfigProvider struct {
-    // Your DB connection or API client
+    db *sql.DB
+    // 导出 channel，让业务层其他地方可以推送变更
+    ChangeCh chan cluster.ClusterConfigChange
 }
 
 func (p *DBConfigProvider) GetAll(ctx context.Context) ([]cluster.ClusterConfig, error) {
@@ -159,37 +163,44 @@ func (p *DBConfigProvider) GetAll(ctx context.Context) ([]cluster.ClusterConfig,
     return []cluster.ClusterConfig{}, nil // TODO: implement
 }
 
-// Step 2: Implement Watch for Push mode (optional but recommended)
+// Step 2: 实现 Watch - 返回一个 channel，kit 会监听这个 channel
+//        业务层在发现配置变化时，主动向这个 channel 推送变更
 func (p *DBConfigProvider) Watch(ctx context.Context) (<-chan cluster.ClusterConfigChange, error) {
-    ch := make(chan cluster.ClusterConfigChange, 10)
+    p.ChangeCh = make(chan cluster.ClusterConfigChange, 10)
 
-    // Your implementation depends on the data source:
-    // - Database: Use NOTIFY/LISTEN or polling
-    // - etcd: Watch API
-    // - HTTP: Server-Sent Events
-    //
-    // Example (polling fallback):
-    // go func() {
-    //     for {
-    //         select {
-    //         case <-ctx.Done():
-    //             close(ch)
-    //             return
-    //         case <-time.After(30 * time.Second):
-    //             // Check for changes and send to channel
-    //             if hasChanges {
-    //                 ch <- cluster.ClusterConfigChange{
-    //                     Type:       cluster.ChangeTypeAdd, // or Update, Delete
-    //                     ClusterID:  "new-cluster",
-    //                     Kubeconfig: []byte(...),
-    //                     TenantID:   "tenant-001",
-    //                 }
-    //             }
-    //         }
-    //     }
-    // }()
+    // 方式 A: 业务自己轮询数据库，发现变化后推送（示例）
+    go func() {
+        for {
+            select {
+            case <-ctx.Done():
+                close(p.ChangeCh)
+                return
+            case <-time.After(30 * time.Second):
+                // 扫描数据库变化，推送增量
+                if changes := p.scanChangesFromDB(); len(changes) > 0 {
+                    for _, c := range changes {
+                        p.ChangeCh <- c
+                    }
+                }
+            }
+        }
+    }()
 
-    return ch, nil
+    return p.ChangeCh, nil
+}
+
+// 业务层调用示例: 修改集群配置后，主动推送变更
+func (s *Server) UpdateClusterAPI(clusterID string, kubeconfig []byte) error {
+    // 1. 更新数据库
+    s.db.UpdateCluster(clusterID, kubeconfig)
+
+    // 2. 主动通知 k8s-kit（通过 channel）
+    s.provider.ChangeCh <- cluster.ClusterConfigChange{
+        Type:       cluster.ChangeTypeUpdate,
+        ClusterID:  clusterID,
+        Kubeconfig: kubeconfig,
+    }
+    return nil
 }
 
 // Step 3: Use with ClusterManager
@@ -247,9 +258,11 @@ type ConfigWatcher interface {
 
 ### Behavior
 
-| Scenario | Behavior |
-|----------|----------|
-| Only implement `GetAll` | Pull only (sync every 5 minutes) |
-| Implement `GetAll` + `Watch` | Hybrid: Push (real-time) + Pull (fallback) |
+| Scenario | Business Implementation Required |
+|----------|----------------------------------|
+| Only `GetAll` | **只需实现 `GetAll()`** → Pull 自动工作，每 5 分钟同步 |
+| `GetAll` + `Watch` | **只需实现 `GetAll()` + `Watch()`** → Push + Pull 混合 |
+
+**关键点**：`GetAll()` 是给 Pull 用的，数据源就是业务实现 `GetAll()` 时查询的地方（MySQL/API/文件）。不需要额外配置。
 | Watch connection fails | Automatically falls back to Pull mode |
 | Manager.Start() not called | Manual Register/Unregister only |
