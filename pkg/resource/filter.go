@@ -84,3 +84,45 @@ func FilterByName[T Object](items []T, pattern string, matchType ...MatchType) [
 	}
 	return filtered
 }
+
+// Paginate 对切片进行分页
+//
+// 参数：
+//   - items: 原始数据切片
+//   - limit: 每页数量（<=0 表示返回全部）
+//   - offset: 起始偏移量（从 0 开始）
+//
+// 返回：
+//   - 分页后的切片
+//   - hasMore: 是否还有更多数据
+//
+// 使用场景：
+//
+//	配合 FilterByName 等过滤函数使用，在客户端内存中完成分页
+//
+// 示例：
+//
+//	// 查全量 → 过滤 → 内存分页
+//	operator.List(ctx, cli, podList)  // 不传 Limit，查全量
+//	filtered := resource.FilterByName(podList.Items, "nginx")
+//	pageData, hasMore := resource.Paginate(filtered, 10, (pageNum-1)*10)
+//
+// ⚠️ 注意：此函数在客户端内存中分页，适合数据量较小的场景
+func Paginate[T any](items []T, limit, offset int) ([]T, bool) {
+	if limit <= 0 {
+		return items, false
+	}
+
+	if offset >= len(items) {
+		return []T{}, false
+	}
+
+	end := offset + limit
+	hasMore := end < len(items)
+
+	if end > len(items) {
+		end = len(items)
+	}
+
+	return items[offset:end], hasMore
+}
