@@ -76,7 +76,65 @@ Client initialization and management.
 
 - `Factory`: Creates ClusterClient from various sources
 - `ClusterClient`: Holds all K8s clients (Clientset, RuntimeClient, RESTConfig)
-- `ClientOptions`: Configuration (timeout, QPS, etc.)
+- `ClientOptions`: Configuration (timeout, QPS, DialContext, etc.)
+
+#### Custom Dial（隧道/代理）
+
+通过 `WithDialContext` 注入自定义拨号函数，适用于内网集群通过代理/隧道访问的场景：
+
+```go
+factory := client.NewFactory()
+cli, err := factory.CreateFromKubeconfig(kubeconfig,
+    client.WithDialContext(func(ctx context.Context, network, addr string) (net.Conn, error) {
+        // 通过隧道连接内网集群
+        return tunnelDial(ctx, network, addr)
+    }),
+)
+```
+
+### `pkg/cluster`
+
+Multi-cluster management with health checking and auto-reconnection.
+
+- `Manager`: Multi-cluster lifecycle management
+- `ConfigProvider`: Interface for loading cluster configs from any source (DB, file, etc.)
+- `ConfigWatcher`: Optional interface for real-time config change notifications
+- `RegisterOptions`: Registration options (TenantID, DialContext)
+
+#### 注册集群时注入隧道
+
+```go
+manager.Register(clusterID, kubeconfig,
+    cluster.WithTenantID("tenant-1"),
+    cluster.WithDialContext(dialFn),  // 可选，内网集群走隧道
+)
+```
+
+#### ConfigProvider 携带 DialContext
+
+实现 `ConfigProvider` 接口时，可为内网集群提供 `DialContext`：
+
+```go
+func (r *MyRepository) GetAll(ctx context.Context) ([]cluster.ClusterConfig, error) {
+    // ...
+    for i, c := range clusters {
+        cfg := cluster.ClusterConfig{
+            ID:         c.ID,
+            Kubeconfig: c.Kubeconfig,
+            TenantID:   c.TenantID,
+        }
+        if c.IsInternal && r.tunnelDial != nil {
+            cfg.DialContext = func(ctx context.Context, network, addr string) (net.Conn, error) {
+                return r.tunnelDial(ctx, c.TenantID, c.GroupID, network, addr)
+            }
+        }
+        result[i] = cfg
+    }
+    return result, nil
+}
+```
+
+Manager 在加载/注册/更新集群时自动将 `DialContext` 透传到 `rest.Config.Dial`，无需外部 hack。
 
 ### `pkg/informer`
 

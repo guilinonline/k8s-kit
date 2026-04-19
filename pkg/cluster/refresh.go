@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"time"
+
+	"github.com/guilinonline/k8s-kit/pkg/client"
 )
 
 // Start starts the ClusterManager with configuration refresh capabilities.
@@ -34,7 +36,12 @@ func (m *Manager) loadAllClusters(ctx context.Context, provider ConfigProvider) 
 	}
 
 	for _, cfg := range configs {
-		if err := m.Register(cfg.ID, cfg.Kubeconfig, WithTenantID(cfg.TenantID)); err != nil {
+		var opts []RegisterOption
+		opts = append(opts, WithTenantID(cfg.TenantID))
+		if cfg.DialContext != nil {
+			opts = append(opts, WithDialContext(cfg.DialContext))
+		}
+		if err := m.Register(cfg.ID, cfg.Kubeconfig, opts...); err != nil {
 			log.Printf("Failed to register cluster %s: %v", cfg.ID, err)
 		}
 	}
@@ -66,7 +73,12 @@ func (m *Manager) watchConfigChanges(ctx context.Context, watcher ConfigWatcher)
 func (m *Manager) handleConfigChange(event ClusterConfigChange) {
 	switch event.Type {
 	case ChangeTypeAdd:
-		if err := m.Register(event.ClusterID, event.Kubeconfig, WithTenantID(event.TenantID)); err != nil {
+		var opts []RegisterOption
+		opts = append(opts, WithTenantID(event.TenantID))
+		if event.DialContext != nil {
+			opts = append(opts, WithDialContext(event.DialContext))
+		}
+		if err := m.Register(event.ClusterID, event.Kubeconfig, opts...); err != nil {
 			log.Printf("Failed to register cluster %s: %v", event.ClusterID, err)
 		}
 	case ChangeTypeUpdate:
@@ -117,7 +129,12 @@ func (m *Manager) syncWithProvider(ctx context.Context, provider ConfigProvider)
 		_, ok := m.getCluster(cfg.ID)
 		if !ok {
 			// New cluster
-			m.Register(cfg.ID, cfg.Kubeconfig, WithTenantID(cfg.TenantID))
+			var opts []RegisterOption
+			opts = append(opts, WithTenantID(cfg.TenantID))
+			if cfg.DialContext != nil {
+				opts = append(opts, WithDialContext(cfg.DialContext))
+			}
+			m.Register(cfg.ID, cfg.Kubeconfig, opts...)
 		}
 		// Note: Update logic would go here in a full implementation
 	}
@@ -135,7 +152,7 @@ func (m *Manager) syncWithProvider(ctx context.Context, provider ConfigProvider)
 }
 
 // Update updates an existing cluster's configuration.
-func (m *Manager) Update(id string, kubeconfig []byte) error {
+func (m *Manager) Update(id string, kubeconfig []byte, opts ...RegisterOption) error {
 	m.mu.Lock()
 	cluster, ok := m.clusters[id]
 	m.mu.Unlock()
@@ -144,8 +161,18 @@ func (m *Manager) Update(id string, kubeconfig []byte) error {
 		return fmt.Errorf("cluster %s not found", id)
 	}
 
+	// Build client options from register options
+	options := &RegisterOptions{}
+	for _, opt := range opts {
+		opt(options)
+	}
+	var clientOpts []client.Option
+	if options.DialContext != nil {
+		clientOpts = append(clientOpts, client.WithDialContext(options.DialContext))
+	}
+
 	// Create new client
-	cli, err := m.clientFactory.CreateFromKubeconfig(kubeconfig)
+	cli, err := m.clientFactory.CreateFromKubeconfig(kubeconfig, clientOpts...)
 	if err != nil {
 		return fmt.Errorf("failed to create client for cluster %s: %w", id, err)
 	}

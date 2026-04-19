@@ -4,6 +4,7 @@ package cluster
 
 import (
 	"context"
+	"net"
 	"sync"
 	"time"
 
@@ -82,7 +83,8 @@ type ClusterConfigChange struct {
 	Type       ChangeType
 	ClusterID  string
 	TenantID   string
-	Kubeconfig []byte // Add/Update events have this field
+	Kubeconfig []byte
+	DialContext func(ctx context.Context, network, addr string) (net.Conn, error)
 }
 
 // ConfigProvider is the interface for providing cluster configurations.
@@ -102,6 +104,7 @@ type ClusterConfig struct {
 	ID         string
 	TenantID   string
 	Kubeconfig []byte
+	DialContext func(ctx context.Context, network, addr string) (net.Conn, error)
 }
 
 // informerManager manages Informers for a single cluster.
