@@ -47,7 +47,13 @@ func (m *Manager) Register(id string, kubeconfig []byte, opts ...RegisterOption)
 		opt(options)
 	}
 
-	cli, err := m.clientFactory.CreateFromKubeconfig(kubeconfig)
+	// 构建 Factory 选项
+	var clientOpts []client.Option
+	if options.DialContext != nil {
+		clientOpts = append(clientOpts, client.WithDialContext(options.DialContext))
+	}
+
+	cli, err := m.clientFactory.CreateFromKubeconfig(kubeconfig, clientOpts...)
 	if err != nil {
 		return fmt.Errorf("failed to create client for cluster %s: %w", id, err)
 	}

@@ -1,6 +1,8 @@
 package client
 
 import (
+	"context"
+	"net"
 	"time"
 
 	"k8s.io/client-go/kubernetes"
@@ -22,6 +24,7 @@ type ClientOptions struct {
 	Burst       int
 	UserAgent   string
 	Impersonate *rest.ImpersonationConfig
+	DialContext func(ctx context.Context, network, addr string) (net.Conn, error)
 }
 
 // Option 客户端选项函数
@@ -52,5 +55,12 @@ func WithBurst(burst int) Option {
 func WithUserAgent(ua string) Option {
 	return func(o *ClientOptions) {
 		o.UserAgent = ua
+	}
+}
+
+// WithDialContext 设置自定义拨号函数（用于隧道/代理）
+func WithDialContext(dialFn func(ctx context.Context, network, addr string) (net.Conn, error)) Option {
+	return func(o *ClientOptions) {
+		o.DialContext = dialFn
 	}
 }

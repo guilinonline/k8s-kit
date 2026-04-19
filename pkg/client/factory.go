@@ -72,6 +72,9 @@ func (f *Factory) createFromRESTConfig(restConf *rest.Config, opts ...Option) (*
 	if options.Impersonate != nil {
 		restConf.Impersonate = *options.Impersonate
 	}
+	if options.DialContext != nil {
+		restConf.Dial = options.DialContext
+	}
 
 	c := &ClusterClient{
 		RESTConfig: restConf,

@@ -1,6 +1,10 @@
 package cluster
 
-import "time"
+import (
+	"context"
+	"net"
+	"time"
+)
 
 // HealthCheckConfig contains configuration for cluster health checking.
 type HealthCheckConfig struct {
@@ -94,13 +98,21 @@ type RegisterOption func(*RegisterOptions)
 
 // RegisterOptions contains options for cluster registration.
 type RegisterOptions struct {
-	TenantID string
+	TenantID   string
+	DialContext func(ctx context.Context, network, addr string) (net.Conn, error)
 }
 
 // WithTenantID sets the tenant ID for the cluster.
 func WithTenantID(tenantID string) RegisterOption {
 	return func(o *RegisterOptions) {
 		o.TenantID = tenantID
+	}
+}
+
+// WithDialContext sets a custom dial function for the cluster connection (e.g., tunnel/proxy).
+func WithDialContext(dialFn func(ctx context.Context, network, addr string) (net.Conn, error)) RegisterOption {
+	return func(o *RegisterOptions) {
+		o.DialContext = dialFn
 	}
 }
 
